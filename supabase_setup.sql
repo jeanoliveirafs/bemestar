@@ -14,6 +14,7 @@ CREATE TABLE public.user_profiles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     name VARCHAR(255),
+    email VARCHAR(255),
     phone VARCHAR(20),
     birth_date DATE,
     avatar TEXT,
@@ -64,10 +65,11 @@ CREATE POLICY "Enable delete for users based on user_id" ON public.user_profiles
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO public.user_profiles (user_id, name)
+    INSERT INTO public.user_profiles (user_id, name, email)
     VALUES (
         NEW.id, 
-        COALESCE(NEW.raw_user_meta_data->>'name', NEW.email)
+        COALESCE(NEW.raw_user_meta_data->>'name', NEW.email),
+        NEW.email
     );
     RETURN NEW;
 EXCEPTION
@@ -85,6 +87,7 @@ CREATE TRIGGER on_auth_user_created
 -- Comentários para documentação
 COMMENT ON TABLE public.user_profiles IS 'Perfis dos usuários vinculados ao sistema de autenticação do Supabase';
 COMMENT ON COLUMN public.user_profiles.name IS 'Nome do usuário obtido do registro ou email';
+COMMENT ON COLUMN public.user_profiles.email IS 'Email do usuário copiado do auth.users';
 COMMENT ON COLUMN public.user_profiles.preferences IS 'Preferências do usuário em formato JSON';
 COMMENT ON COLUMN public.user_profiles.metadata IS 'Metadados adicionais do usuário';
 
