@@ -1,6 +1,4 @@
 import { 
-  users, 
-  userProfiles,
   type User, 
   type InsertUser,
   type UpdateUser,
@@ -10,23 +8,18 @@ import {
   type UserWithProfile
 } from "@shared/schema";
 import { createClient } from '@supabase/supabase-js';
-import * as bcrypt from 'bcryptjs';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import { eq } from 'drizzle-orm';
-import { users, userProfiles } from '../shared/schema';
 
 // Configuração do Supabase
-const supabaseUrl = process.env.SUPABASE_URL || 'https://yeizisgimwwwvestmhnj.supabase.co';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllaXppc2dpbXd3d3Zlc3RtaG5qIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Mjk2MTExNSwiZXhwIjoyMDY4NTM3MTE1fQ.yQm2MMnpI0e2VBeg0Cbwhjml_OvBmMa0ouH0c-7ceDk';
+const supabaseUrl = process.env.SUPABASE_URL || 'https://your-project.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-service-role-key';
 
 // Cliente Supabase para operações administrativas
-export const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-// Configuração do banco de dados com Drizzle
-const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:[YOUR-PASSWORD]@db.yeizisgimwwwvestmhnj.supabase.co:5432/postgres';
-const client = postgres(databaseUrl);
-export const db = drizzle(client);
+export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
 
 export interface IStorage {
   // User methods
@@ -49,26 +42,6 @@ export interface IStorage {
  * Fornece operações CRUD para usuários e perfis com hash de senhas
  */
 export class SupabaseStorage implements IStorage {
-  
-  /**
-   * Hash da senha usando bcrypt
-   * @param password - Senha em texto plano
-   * @returns Promise com a senha hasheada
-   */
-  private async hashPassword(password: string): Promise<string> {
-    const saltRounds = 12;
-    return bcrypt.hash(password, saltRounds);
-  }
-
-  /**
-   * Verifica se a senha fornecida corresponde ao hash armazenado
-   * @param password - Senha em texto plano
-   * @param hashedPassword - Hash armazenado no banco
-   * @returns Promise<boolean> indicando se a senha está correta
-   */
-  async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-    return bcrypt.compare(password, hashedPassword);
-  }
 
   /**
    * Busca usuário por ID
@@ -77,8 +50,18 @@ export class SupabaseStorage implements IStorage {
    */
   async getUserById(id: number): Promise<User | undefined> {
     try {
-      const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
-      return result[0];
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        console.error('Erro ao buscar usuário por ID:', error);
+        return undefined;
+      }
+      
+      return data;
     } catch (error) {
       console.error('Erro ao buscar usuário por ID:', error);
       return undefined;
@@ -92,8 +75,18 @@ export class SupabaseStorage implements IStorage {
    */
   async getUserByEmail(email: string): Promise<User | undefined> {
     try {
-      const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
-      return result[0];
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .single();
+      
+      if (error) {
+        console.error('Erro ao buscar usuário por email:', error);
+        return undefined;
+      }
+      
+      return data;
     } catch (error) {
       console.error('Erro ao buscar usuário por email:', error);
       return undefined;
@@ -101,21 +94,45 @@ export class SupabaseStorage implements IStorage {
   }
 
   /**
-   * Cria um novo usuário com senha hasheada
+   * Cria um novo usuário usando Supabase Auth
    * @param insertUser - Dados do usuário para inserção
    * @returns Promise com o usuário criado
    */
   async createUser(insertUser: InsertUser): Promise<User> {
     try {
-      // Hash da senha antes de salvar
-      const hashedPassword = await this.hashPassword(insertUser.password);
+      const { data, error } = await supabase.auth.admin.createUser({
+        email: insertUser.email,
+        password: insertUser.password,
+        user_metadata: {
+          name: insertUser.name
+        }
+      });
       
-      const result = await db.insert(users).values({
-        ...insertUser,
-        password: hashedPassword
-      }).returning();
+      if (error) {
+        console.error('Erro ao criar usuário:', error);
+        throw new Error('Falha ao criar usuário');
+      }
       
-      return result[0];
+      // Inserir dados adicionais na tabela users
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .insert({
+          id: data.user.id,
+          email: insertUser.email,
+          name: insertUser.name,
+          password: '', // Senha gerenciada pelo Supabase Auth
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+      
+      if (userError) {
+        console.error('Erro ao inserir dados do usuário:', userError);
+        throw new Error('Falha ao criar dados do usuário');
+      }
+      
+      return userData;
     } catch (error) {
       console.error('Erro ao criar usuário:', error);
       throw new Error('Falha ao criar usuário');
@@ -130,18 +147,37 @@ export class SupabaseStorage implements IStorage {
    */
   async updateUser(id: number, updateData: UpdateUser): Promise<User | undefined> {
     try {
-      // Se a senha está sendo atualizada, fazer hash
-      const dataToUpdate = { ...updateData };
-      if (dataToUpdate.password) {
-        dataToUpdate.password = await this.hashPassword(dataToUpdate.password);
+      // Se a senha está sendo atualizada, usar Supabase Auth
+      if (updateData.password) {
+        const { error: authError } = await supabase.auth.admin.updateUserById(
+          id.toString(),
+          { password: updateData.password }
+        );
+        
+        if (authError) {
+          console.error('Erro ao atualizar senha:', authError);
+          return undefined;
+        }
       }
       
-      const result = await db.update(users)
-        .set({ ...dataToUpdate, updatedAt: new Date() })
-        .where(eq(users.id, id))
-        .returning();
+      // Atualizar outros dados na tabela users
+      const { data, error } = await supabase
+        .from('users')
+        .update({
+          ...updateData,
+          password: undefined, // Não atualizar senha na tabela
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
       
-      return result[0];
+      if (error) {
+        console.error('Erro ao atualizar usuário:', error);
+        return undefined;
+      }
+      
+      return data;
     } catch (error) {
       console.error('Erro ao atualizar usuário:', error);
       return undefined;
@@ -155,8 +191,18 @@ export class SupabaseStorage implements IStorage {
    */
   async getUserProfile(userId: number): Promise<UserProfile | undefined> {
     try {
-      const result = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1);
-      return result[0];
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (error) {
+        console.error('Erro ao buscar perfil do usuário:', error);
+        return undefined;
+      }
+      
+      return data;
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);
       return undefined;
@@ -170,8 +216,22 @@ export class SupabaseStorage implements IStorage {
    */
   async createUserProfile(insertProfile: InsertUserProfile): Promise<UserProfile> {
     try {
-      const result = await db.insert(userProfiles).values(insertProfile).returning();
-      return result[0];
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .insert({
+          ...insertProfile,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Erro ao criar perfil do usuário:', error);
+        throw new Error('Falha ao criar perfil do usuário');
+      }
+      
+      return data;
     } catch (error) {
       console.error('Erro ao criar perfil do usuário:', error);
       throw new Error('Falha ao criar perfil do usuário');
@@ -186,12 +246,22 @@ export class SupabaseStorage implements IStorage {
    */
   async updateUserProfile(userId: number, updateData: UpdateUserProfile): Promise<UserProfile | undefined> {
     try {
-      const result = await db.update(userProfiles)
-        .set({ ...updateData, updatedAt: new Date() })
-        .where(eq(userProfiles.userId, userId))
-        .returning();
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .update({
+          ...updateData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .select()
+        .single();
       
-      return result[0];
+      if (error) {
+        console.error('Erro ao atualizar perfil do usuário:', error);
+        return undefined;
+      }
+      
+      return data;
     } catch (error) {
       console.error('Erro ao atualizar perfil do usuário:', error);
       return undefined;
@@ -205,22 +275,25 @@ export class SupabaseStorage implements IStorage {
    */
   async getUserWithProfile(userId: number): Promise<{ user: User; profile: UserProfile | null } | undefined> {
     try {
-      const result = await db
-        .select({
-          user: users,
-          profile: userProfiles
-        })
-        .from(users)
-        .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
-        .where(eq(users.id, userId))
-        .limit(1);
+      const { data, error } = await supabase
+        .from('users')
+        .select(`
+          *,
+          user_profiles (*)
+        `)
+        .eq('id', userId)
+        .single();
       
-      if (result.length === 0) {
+      if (error) {
+        console.error('Erro ao buscar usuário com perfil:', error);
         return undefined;
       }
       
-      const { user, profile } = result[0];
-      return { user, profile };
+      const { user_profiles, ...user } = data;
+      return {
+        user,
+        profile: user_profiles?.[0] || null
+      };
     } catch (error) {
       console.error('Erro ao buscar usuário com perfil:', error);
       return undefined;
@@ -228,24 +301,26 @@ export class SupabaseStorage implements IStorage {
   }
 
   /**
-   * Método para autenticação de usuário
+   * Método para autenticação de usuário usando Supabase Auth
    * @param email - Email do usuário
    * @param password - Senha em texto plano
    * @returns Promise com o usuário autenticado ou null se credenciais inválidas
    */
   async authenticateUser(email: string, password: string): Promise<User | null> {
     try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error || !data.user) {
+        console.error('Erro na autenticação:', error);
+        return null;
+      }
+      
+      // Buscar dados do usuário na tabela users
       const user = await this.getUserByEmail(email);
-      if (!user) {
-        return null;
-      }
-      
-      const isValidPassword = await this.verifyPassword(password, user.password);
-      if (!isValidPassword) {
-        return null;
-      }
-      
-      return user;
+      return user || null;
     } catch (error) {
       console.error('Erro na autenticação:', error);
       return null;

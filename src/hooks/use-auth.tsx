@@ -1,108 +1,133 @@
-import { useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
+import type { User } from '@supabase/supabase-js';
 
-// Tipo do usuário baseado no schema do backend
-interface User {
-  id: number
-  email: string
-  name: string
-  createdAt: string
-  updatedAt: string
+interface AuthUser {
+  id: string;
+  email: string;
+  name?: string;
 }
 
-interface AuthError {
-  message: string
-  errors?: Array<{ field: string; message: string }>
+interface AuthContextType {
+  user: AuthUser | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<{ data?: AuthUser; error?: { message: string } }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ data?: AuthUser; error?: { message: string } }>;
+  signOut: () => Promise<void>;
 }
 
-export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar se há usuário logado no localStorage
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (error) {
-        console.error('Erro ao carregar usuário do localStorage:', error)
-        localStorage.removeItem('user')
+    // Verificar sessão atual
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email!,
+          name: session.user.user_metadata?.name
+        });
       }
-    }
-    setLoading(false)
-  }, [])
+      setLoading(false);
+    });
+
+    // Escutar mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email!,
+            name: session.user.user_metadata?.name
+          });
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        return { data: null, error: data as AuthError }
+      if (error) {
+        return { error: { message: error.message } };
       }
 
-      const userData = data.user
-      setUser(userData)
-      localStorage.setItem('user', JSON.stringify(userData))
-      
-      return { data: { user: userData }, error: null }
+      if (data.user) {
+        const userData = {
+          id: data.user.id,
+          email: data.user.email!,
+          name: data.user.user_metadata?.name
+        };
+        return { data: userData };
+      }
+
+      return { error: { message: 'Erro no login' } };
     } catch (error) {
-      console.error('Erro no login:', error)
-      return { 
-        data: null, 
-        error: { message: 'Erro de conexão. Tente novamente.' } as AuthError 
-      }
+      console.error('Erro no login:', error);
+      return { error: { message: 'Erro de conexão' } };
     }
-  }
+  };
 
   const signUp = async (email: string, password: string, name: string) => {
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, name }),
-      })
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name
+          }
+        }
+      });
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        return { data: null, error: data as AuthError }
+      if (error) {
+        return { error: { message: error.message } };
       }
 
-      const userData = data.user
-      setUser(userData)
-      localStorage.setItem('user', JSON.stringify(userData))
-      
-      return { data: { user: userData }, error: null }
+      if (data.user) {
+        const userData = {
+          id: data.user.id,
+          email: data.user.email!,
+          name: name
+        };
+        return { data: userData };
+      }
+
+      return { error: { message: 'Erro no registro' } };
     } catch (error) {
-      console.error('Erro no registro:', error)
-      return { 
-        data: null, 
-        error: { message: 'Erro de conexão. Tente novamente.' } as AuthError 
-      }
+      console.error('Erro no registro:', error);
+      return { error: { message: 'Erro de conexão' } };
     }
-  }
+  };
 
   const signOut = async () => {
-    setUser(null)
-    localStorage.removeItem('user')
-    return { error: null }
-  }
+    await supabase.auth.signOut();
+  };
 
-  return {
-    user,
-    loading,
-    signIn,
-    signUp,
-    signOut,
+  return (
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
   }
+  return context;
 }

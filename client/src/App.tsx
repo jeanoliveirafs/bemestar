@@ -4,7 +4,7 @@ import { CssBaseline } from "@mui/material";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { AuthProvider, useAuth } from "./hooks/use-auth";
 import { EnhancedHeader } from "@/components/layout/enhanced-header";
 import { ThemeContextProvider } from "@/contexts/theme-context";
 

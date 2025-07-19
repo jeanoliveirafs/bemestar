@@ -1,127 +1,124 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase, signIn, signUp, signOut } from '@/lib/supabaseClient';
+import { supabase } from '../lib/supabase';
+import type { User } from '@supabase/supabase-js';
 
-interface User {
+interface AuthUser {
   id: string;
   email: string;
-  name: string;
+  name?: string;
 }
 
 interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
-  isLoading: boolean;
+  user: AuthUser | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<{ data?: AuthUser; error?: { message: string } }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ data?: AuthUser; error?: { message: string } }>;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on mount
-    const checkUser = async () => {
-      try {
-        // Verificar se existe um usuário mock no localStorage
-        const mockUserStr = localStorage.getItem('mockUser');
-        if (mockUserStr) {
-          const mockUser = JSON.parse(mockUserStr);
-          const user = {
-            id: mockUser.id,
-            email: mockUser.email || '',
-            name: mockUser.user_metadata?.name || mockUser.email?.split('@')[0] || 'Usuário'
-          };
-          setUser(user);
-        }
-      } catch (error) {
-        console.error('Erro ao verificar sessão do usuário:', error);
-      } finally {
-        setIsLoading(false);
+    // Verificar sessão atual
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email!,
+          name: session.user.user_metadata?.name
+        });
       }
-    };
+      setLoading(false);
+    });
 
-    checkUser();
-
-    // Listener para mudanças no localStorage (para simular eventos de autenticação)
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'mockUser') {
-        if (event.newValue) {
-          const mockUser = JSON.parse(event.newValue);
+    // Escutar mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
           setUser({
-            id: mockUser.id,
-            email: mockUser.email || '',
-            name: mockUser.user_metadata?.name || mockUser.email?.split('@')[0] || 'Usuário'
+            id: session.user.id,
+            email: session.user.email!,
+            name: session.user.user_metadata?.name
           });
         } else {
           setUser(null);
         }
-        setIsLoading(false);
+        setLoading(false);
       }
-    };
+    );
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
+  const signIn = async (email: string, password: string) => {
     try {
-      const { data, error } = await signIn(email, password);
-      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
       if (error) {
-        throw new Error(error.message);
+        return { error: { message: error.message } };
       }
-      
+
       if (data.user) {
-        const user = {
+        const userData = {
           id: data.user.id,
-          email: data.user.email || '',
-          name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário'
+          email: data.user.email!,
+          name: data.user.user_metadata?.name
         };
-        setUser(user);
+        return { data: userData };
       }
-    } catch (error: any) {
-      throw new Error(error.message || 'Erro ao fazer login. Verifique suas credenciais.');
-    } finally {
-      setIsLoading(false);
+
+      return { error: { message: 'Erro no login' } };
+    } catch (error) {
+      console.error('Erro no login:', error);
+      return { error: { message: 'Erro de conexão' } };
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
-    setIsLoading(true);
+  const signUp = async (email: string, password: string, name: string) => {
     try {
-      const { data, error } = await signUp(email, password, name);
-      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name
+          }
+        }
+      });
+
       if (error) {
-        throw new Error(error.message);
+        return { error: { message: error.message } };
       }
-    } catch (error: any) {
-      throw new Error(error.message || 'Erro ao criar conta. Tente novamente.');
-    } finally {
-      setIsLoading(false);
+
+      if (data.user) {
+        const userData = {
+          id: data.user.id,
+          email: data.user.email!,
+          name: name
+        };
+        return { data: userData };
+      }
+
+      return { error: { message: 'Erro no registro' } };
+    } catch (error) {
+      console.error('Erro no registro:', error);
+      return { error: { message: 'Erro de conexão' } };
     }
   };
 
-  const logout = async () => {
-    try {
-      // Fazer logout no Supabase
-      const { error } = await signOut();
-      if (error) {
-        console.error('Erro ao fazer logout do Supabase:', error);
-      }
-      setUser(null);
-    } catch (error: any) {
-      console.error('Erro durante o logout:', error);
-      // Ainda limpa o usuário mesmo se o logout do Supabase falhar
-      setUser(null);
-    }
+  const signOut = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

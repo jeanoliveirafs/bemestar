@@ -1,24 +1,19 @@
 -- Script SQL para configurar o banco de dados no Supabase
 -- Execute este script no SQL Editor do Supabase
+-- IMPORTANTE: Configuração correta para autenticação com Supabase Auth
+
+-- Remover tabelas antigas se existirem
+DROP TABLE IF EXISTS public.user_profiles CASCADE;
+DROP TABLE IF EXISTS public.users CASCADE;
 
 -- Habilitar extensões necessárias
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Criar tabela de usuários
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Criar tabela de perfis de usuário
-CREATE TABLE IF NOT EXISTS user_profiles (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+-- Criar tabela de perfis de usuário (vinculada ao auth.users do Supabase)
+CREATE TABLE public.user_profiles (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    name VARCHAR(255),
     phone VARCHAR(20),
     birth_date DATE,
     avatar TEXT,
@@ -31,87 +26,86 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 );
 
 -- Criar índices para melhor performance
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
-CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
-CREATE INDEX IF NOT EXISTS idx_user_profiles_created_at ON user_profiles(created_at);
+CREATE INDEX idx_user_profiles_user_id ON public.user_profiles(user_id);
+CREATE INDEX idx_user_profiles_created_at ON public.user_profiles(created_at);
 
 -- Função para atualizar updated_at automaticamente
-CREATE OR REPLACE FUNCTION update_updated_at_column()
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE plpgsql;
 
--- Triggers para atualizar updated_at automaticamente
-DROP TRIGGER IF EXISTS update_users_updated_at ON users;
-CREATE TRIGGER update_users_updated_at
-    BEFORE UPDATE ON users
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
-DROP TRIGGER IF EXISTS update_user_profiles_updated_at ON user_profiles;
+-- Trigger para atualizar updated_at automaticamente
 CREATE TRIGGER update_user_profiles_updated_at
-    BEFORE UPDATE ON user_profiles
+    BEFORE UPDATE ON public.user_profiles
     FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+    EXECUTE FUNCTION public.update_updated_at_column();
 
--- Políticas RLS (Row Level Security) para segurança
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+-- Habilitar RLS (Row Level Security)
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
--- Política para usuários: podem ver e editar apenas seus próprios dados
-CREATE POLICY "Users can view own data" ON users
-    FOR SELECT USING (auth.uid()::text = id::text);
+-- Políticas RLS para user_profiles
+CREATE POLICY "Enable read access for users based on user_id" ON public.user_profiles
+    FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own data" ON users
-    FOR UPDATE USING (auth.uid()::text = id::text);
+CREATE POLICY "Enable insert for users based on user_id" ON public.user_profiles
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- Política para perfis: podem ver e editar apenas seus próprios perfis
-CREATE POLICY "Users can view own profile" ON user_profiles
-    FOR SELECT USING (auth.uid()::text = user_id::text);
+CREATE POLICY "Enable update for users based on user_id" ON public.user_profiles
+    FOR UPDATE USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert own profile" ON user_profiles
-    FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
+CREATE POLICY "Enable delete for users based on user_id" ON public.user_profiles
+    FOR DELETE USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own profile" ON user_profiles
-    FOR UPDATE USING (auth.uid()::text = user_id::text);
+-- Função para criar perfil automaticamente quando um usuário se registra
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.user_profiles (user_id, name)
+    VALUES (
+        NEW.id, 
+        COALESCE(NEW.raw_user_meta_data->>'name', NEW.email)
+    );
+    RETURN NEW;
+EXCEPTION
+    WHEN others THEN
+        RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE POLICY "Users can delete own profile" ON user_profiles
-    FOR DELETE USING (auth.uid()::text = user_id::text);
-
--- Inserir dados de exemplo (opcional)
-INSERT INTO users (email, name, password) VALUES 
-('admin@refugiodigital.com', 'Administrador', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/RK.s5uO.O')
-ON CONFLICT (email) DO NOTHING;
-
--- Inserir perfil de exemplo para o usuário admin
-INSERT INTO user_profiles (user_id, phone, bio, preferences, metadata) 
-SELECT 
-    u.id,
-    '+55 11 99999-9999',
-    'Administrador do sistema Refúgio Digital',
-    '{"theme": "light", "notifications": true, "language": "pt-BR"}',
-    '{"lastLogin": "2024-01-01T00:00:00Z", "loginCount": 1}'
-FROM users u 
-WHERE u.email = 'admin@refugiodigital.com'
-ON CONFLICT (user_id) DO NOTHING;
+-- Trigger para criar perfil automaticamente
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Comentários para documentação
-COMMENT ON TABLE users IS 'Tabela de usuários do sistema';
-COMMENT ON TABLE user_profiles IS 'Perfis detalhados dos usuários';
-COMMENT ON COLUMN users.password IS 'Senha hasheada com bcrypt';
-COMMENT ON COLUMN user_profiles.preferences IS 'Preferências do usuário em formato JSON';
-COMMENT ON COLUMN user_profiles.metadata IS 'Metadados adicionais em formato JSON';
+COMMENT ON TABLE public.user_profiles IS 'Perfis dos usuários vinculados ao sistema de autenticação do Supabase';
+COMMENT ON COLUMN public.user_profiles.name IS 'Nome do usuário obtido do registro ou email';
+COMMENT ON COLUMN public.user_profiles.preferences IS 'Preferências do usuário em formato JSON';
+COMMENT ON COLUMN public.user_profiles.metadata IS 'Metadados adicionais do usuário';
 
--- Verificar se as tabelas foram criadas corretamente
+-- Verificar se tudo foi criado corretamente
 SELECT 
-    table_name,
+    'user_profiles' as table_name,
     column_name,
     data_type,
     is_nullable
 FROM information_schema.columns 
-WHERE table_name IN ('users', 'user_profiles')
-ORDER BY table_name, ordinal_position;
+WHERE table_schema = 'public' AND table_name = 'user_profiles'
+ORDER BY ordinal_position;
+
+-- Verificar políticas RLS
+SELECT 
+    schemaname,
+    tablename,
+    policyname,
+    permissive,
+    roles,
+    cmd,
+    qual
+FROM pg_policies 
+WHERE tablename = 'user_profiles';
