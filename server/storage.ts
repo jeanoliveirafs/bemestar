@@ -9,6 +9,24 @@ import {
   type UpdateUserProfile,
   type UserWithProfile
 } from "@shared/schema";
+import { createClient } from '@supabase/supabase-js';
+import * as bcrypt from 'bcryptjs';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import { eq } from 'drizzle-orm';
+import { users, userProfiles } from '../shared/schema';
+
+// Configuração do Supabase
+const supabaseUrl = process.env.SUPABASE_URL || 'https://yeizisgimwwwvestmhnj.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllaXppc2dpbXd3d3Zlc3RtaG5qIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Mjk2MTExNSwiZXhwIjoyMDY4NTM3MTE1fQ.yQm2MMnpI0e2VBeg0Cbwhjml_OvBmMa0ouH0c-7ceDk';
+
+// Cliente Supabase para operações administrativas
+export const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// Configuração do banco de dados com Drizzle
+const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:[YOUR-PASSWORD]@db.yeizisgimwwwvestmhnj.supabase.co:5432/postgres';
+const client = postgres(databaseUrl);
+export const db = drizzle(client);
 
 export interface IStorage {
   // User methods
@@ -26,134 +44,213 @@ export interface IStorage {
   getUserWithProfile(userId: number): Promise<UserWithProfile | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User> = new Map();
-  private userProfiles: Map<number, UserProfile> = new Map();
+/**
+ * Implementação do storage usando Supabase e Drizzle ORM
+ * Fornece operações CRUD para usuários e perfis com hash de senhas
+ */
+export class SupabaseStorage implements IStorage {
   
-  private currentUserId = 1;
-  private currentProfileId = 1;
-
-  constructor() {
-    // Initialize with sample data
-    this.initializeSampleData();
+  /**
+   * Hash da senha usando bcrypt
+   * @param password - Senha em texto plano
+   * @returns Promise com a senha hasheada
+   */
+  private async hashPassword(password: string): Promise<string> {
+    const saltRounds = 12;
+    return bcrypt.hash(password, saltRounds);
   }
 
-  private initializeSampleData() {
-    // Create a sample user
-    const sampleUser: User = {
-      id: 1,
-      email: "maria@example.com",
-      name: "Maria Silva",
-      password: "password",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.users.set(1, sampleUser);
-    this.currentUserId = 2;
-
-    // Create a sample user profile
-    const sampleProfile: UserProfile = {
-      id: 1,
-      userId: 1,
-      phone: "+55 11 99999-9999",
-      birthDate: "1990-05-15",
-      avatar: null,
-      bio: "Desenvolvedora apaixonada por tecnologia e bem-estar.",
-      preferences: {
-        theme: "light",
-        notifications: true,
-        language: "pt-BR"
-      },
-      metadata: {
-        lastLogin: new Date().toISOString(),
-        loginCount: 42
-      },
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.userProfiles.set(1, sampleProfile);
-    this.currentProfileId = 2;
+  /**
+   * Verifica se a senha fornecida corresponde ao hash armazenado
+   * @param password - Senha em texto plano
+   * @param hashedPassword - Hash armazenado no banco
+   * @returns Promise<boolean> indicando se a senha está correta
+   */
+  async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+    return bcrypt.compare(password, hashedPassword);
   }
 
+  /**
+   * Busca usuário por ID
+   * @param id - ID do usuário
+   * @returns Promise com o usuário ou undefined se não encontrado
+   */
   async getUserById(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const now = new Date();
-    const user: User = {
-      ...insertUser,
-      id,
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.users.set(id, user);
-    return user;
-  }
-
-  async updateUser(id: number, updateData: UpdateUser): Promise<User | undefined> {
-    const user = this.users.get(id);
-    if (user) {
-      const updatedUser: User = {
-        ...user,
-        ...updateData,
-        updatedAt: new Date(),
-      };
-      this.users.set(id, updatedUser);
-      return updatedUser;
-    }
-    return undefined;
-  }
-
-  async getUserProfile(userId: number): Promise<UserProfile | undefined> {
-    return Array.from(this.userProfiles.values()).find(profile => profile.userId === userId);
-  }
-
-  async createUserProfile(insertProfile: InsertUserProfile): Promise<UserProfile> {
-    const id = this.currentProfileId++;
-    const now = new Date();
-    const profile: UserProfile = {
-      ...insertProfile,
-      id,
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.userProfiles.set(id, profile);
-    return profile;
-  }
-
-  async updateUserProfile(userId: number, updateData: UpdateUserProfile): Promise<UserProfile | undefined> {
-    const profile = Array.from(this.userProfiles.values()).find(p => p.userId === userId);
-    if (profile) {
-      const updatedProfile: UserProfile = {
-        ...profile,
-        ...updateData,
-        updatedAt: new Date(),
-      };
-      this.userProfiles.set(profile.id, updatedProfile);
-      return updatedProfile;
-    }
-    return undefined;
-  }
-
-  async getUserWithProfile(userId: number): Promise<UserWithProfile | undefined> {
-    const user = await this.getUserById(userId);
-    if (!user) {
+    try {
+      const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error('Erro ao buscar usuário por ID:', error);
       return undefined;
     }
-    
-    const profile = await this.getUserProfile(userId);
-    
-    return {
-      ...user,
-      profile
-    };
+  }
+
+  /**
+   * Busca usuário por email
+   * @param email - Email do usuário
+   * @returns Promise com o usuário ou undefined se não encontrado
+   */
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    try {
+      const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error('Erro ao buscar usuário por email:', error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Cria um novo usuário com senha hasheada
+   * @param insertUser - Dados do usuário para inserção
+   * @returns Promise com o usuário criado
+   */
+  async createUser(insertUser: InsertUser): Promise<User> {
+    try {
+      // Hash da senha antes de salvar
+      const hashedPassword = await this.hashPassword(insertUser.password);
+      
+      const result = await db.insert(users).values({
+        ...insertUser,
+        password: hashedPassword
+      }).returning();
+      
+      return result[0];
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error);
+      throw new Error('Falha ao criar usuário');
+    }
+  }
+
+  /**
+   * Atualiza dados do usuário
+   * @param id - ID do usuário
+   * @param updateData - Dados para atualização
+   * @returns Promise com o usuário atualizado ou undefined se não encontrado
+   */
+  async updateUser(id: number, updateData: UpdateUser): Promise<User | undefined> {
+    try {
+      // Se a senha está sendo atualizada, fazer hash
+      const dataToUpdate = { ...updateData };
+      if (dataToUpdate.password) {
+        dataToUpdate.password = await this.hashPassword(dataToUpdate.password);
+      }
+      
+      const result = await db.update(users)
+        .set({ ...dataToUpdate, updatedAt: new Date() })
+        .where(eq(users.id, id))
+        .returning();
+      
+      return result[0];
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Busca perfil do usuário por ID do usuário
+   * @param userId - ID do usuário
+   * @returns Promise com o perfil ou undefined se não encontrado
+   */
+  async getUserProfile(userId: number): Promise<UserProfile | undefined> {
+    try {
+      const result = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1);
+      return result[0];
+    } catch (error) {
+      console.error('Erro ao buscar perfil do usuário:', error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Cria um novo perfil de usuário
+   * @param insertProfile - Dados do perfil para inserção
+   * @returns Promise com o perfil criado
+   */
+  async createUserProfile(insertProfile: InsertUserProfile): Promise<UserProfile> {
+    try {
+      const result = await db.insert(userProfiles).values(insertProfile).returning();
+      return result[0];
+    } catch (error) {
+      console.error('Erro ao criar perfil do usuário:', error);
+      throw new Error('Falha ao criar perfil do usuário');
+    }
+  }
+
+  /**
+   * Atualiza perfil do usuário
+   * @param userId - ID do usuário
+   * @param updateData - Dados para atualização
+   * @returns Promise com o perfil atualizado ou undefined se não encontrado
+   */
+  async updateUserProfile(userId: number, updateData: UpdateUserProfile): Promise<UserProfile | undefined> {
+    try {
+      const result = await db.update(userProfiles)
+        .set({ ...updateData, updatedAt: new Date() })
+        .where(eq(userProfiles.userId, userId))
+        .returning();
+      
+      return result[0];
+    } catch (error) {
+      console.error('Erro ao atualizar perfil do usuário:', error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Busca usuário com seu perfil completo usando JOIN
+   * @param userId - ID do usuário
+   * @returns Promise com usuário e perfil ou undefined se usuário não encontrado
+   */
+  async getUserWithProfile(userId: number): Promise<{ user: User; profile: UserProfile | null } | undefined> {
+    try {
+      const result = await db
+        .select({
+          user: users,
+          profile: userProfiles
+        })
+        .from(users)
+        .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+        .where(eq(users.id, userId))
+        .limit(1);
+      
+      if (result.length === 0) {
+        return undefined;
+      }
+      
+      const { user, profile } = result[0];
+      return { user, profile };
+    } catch (error) {
+      console.error('Erro ao buscar usuário com perfil:', error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Método para autenticação de usuário
+   * @param email - Email do usuário
+   * @param password - Senha em texto plano
+   * @returns Promise com o usuário autenticado ou null se credenciais inválidas
+   */
+  async authenticateUser(email: string, password: string): Promise<User | null> {
+    try {
+      const user = await this.getUserByEmail(email);
+      if (!user) {
+        return null;
+      }
+      
+      const isValidPassword = await this.verifyPassword(password, user.password);
+      if (!isValidPassword) {
+        return null;
+      }
+      
+      return user;
+    } catch (error) {
+      console.error('Erro na autenticação:', error);
+      return null;
+    }
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new SupabaseStorage();

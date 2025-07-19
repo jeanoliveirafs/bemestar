@@ -17,12 +17,14 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
-  const { login, register, isLoading } = useAuth();
+  const { signIn, signUp, loading } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     try {
       if (isRegister) {
@@ -34,13 +36,34 @@ export default function Login() {
           });
           return;
         }
-        await register(name, email, password);
+        
+        const { data, error } = await signUp(email, password, name);
+        
+        if (error) {
+          toast({
+            title: "Erro no registro",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        
         toast({
           title: "Bem-vindo ao Refúgio!",
           description: "Sua conta foi criada com sucesso",
         });
       } else {
-        await login(email, password);
+        const { data, error } = await signIn(email, password);
+        
+        if (error) {
+          toast({
+            title: "Erro no login",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        
         toast({
           title: "Bem-vindo de volta!",
           description: "Login realizado com sucesso",
@@ -53,6 +76,8 @@ export default function Login() {
         description: error instanceof Error ? error.message : "Algo deu errado",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -182,9 +207,9 @@ export default function Login() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isLoading}
+                disabled={isSubmitting || loading}
               >
-                {isLoading ? (
+                {(isSubmitting || loading) ? (
                   <i className="fas fa-spinner fa-spin mr-2"></i>
                 ) : (
                   <i className={`fas ${isRegister ? 'fa-user-plus' : 'fa-sign-in-alt'} mr-2`}></i>
