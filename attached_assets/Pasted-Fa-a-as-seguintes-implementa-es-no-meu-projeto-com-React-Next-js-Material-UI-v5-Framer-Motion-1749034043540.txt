@@ -1,0 +1,66 @@
+Faça as seguintes implementações no meu projeto com:
+
+React + Next.js
+
+Material UI v5
+
+Framer Motion
+
+Estilo: Glassmorphism + Material Design
+
+PWA configurado com next-pwa
+
+1️⃣ Adicionar Texto Motivacional no Topo do Dashboard
+Crie um componente fixado no topo do dashboard com frases motivacionais aleatórias.
+
+As frases devem trocar automaticamente a cada 5 minutos (300.000 ms) usando setInterval.
+
+Use Framer Motion para animar suavemente a transição de uma frase para outra (fade, slide, ou scale).
+
+O componente deve ser responsivo e bonito nos temas claro e escuro.
+
+Usar Card ou Box com efeito leve de glassmorphism (backdropFilter, transparência e sombra suave).
+
+Texto centralizado com tipografia destacada (variant="h4" ou h5).
+
+Não permitir que a frase estoure ou ultrapasse os limites da tela em dispositivos pequenos.
+
+Frases exemplo:
+
+"Acredite no seu potencial todos os dias."
+
+"Você é mais forte do que imagina."
+
+"Cada passo te aproxima do seu sucesso."
+
+"A jornada é difícil, mas a vitória vale a pena."
+
+"Persistência supera talento."
+
+2️⃣ Corrigir Sistema de Tema Claro/Escuro no Mobile
+O botão de alternância de tema deve funcionar corretamente em todos os dispositivos, incluindo mobile (Android e iOS).
+
+O ícone do botão de tema deve mudar de acordo com o modo atual:
+
+☀️ (claro) → mostrar ícone de lua 🌙
+
+🌙 (escuro) → mostrar ícone de sol ☀️
+
+Implementar persistência da preferência de tema com localStorage.
+
+Detectar o tema preferido do usuário no primeiro acesso (window.matchMedia).
+
+O ThemeProvider do MUI deve ser aplicado corretamente em _app.js.
+
+Usar createContext para tema global (ThemeContext) com toggleTheme e mode.
+
+Garantir que nenhum elemento fique invisível ou suma ao alternar o tema, tanto em mobile quanto desktop.
+
+Adicionar transição suave com Framer Motion ou CSS (transition: background-color, etc.).
+
+Extras:
+Tudo deve ser responsivo e bonito no mobile.
+
+Priorize design moderno, animado, elegante e limpo.
+
+Use sx do MUI para estilo em vez de CSS externo sempre que possível.

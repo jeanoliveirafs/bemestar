@@ -1,0 +1,391 @@
+ Refúgio Digital - SaaS de Bem-estar Mental
+
+Contexto: crie um aplicativo crie um saas funcional e empático com foco em saúde mental, bem-estar emocional e apoio psicológico para pessoas que sofrem de depressão, ansiedade ou outras questões emocionais, especialmente aquelas que não têm condições financeiras para pagar terapia
+
+Descrição do Projeto:
+Contexto: crie um aplicativo de crie um saas funcional e empático com foco em saúde mental, bem-estar emocional e apoio psicológico para pessoas que sofrem de depressão, ansiedade ou outras questões emocionais, especialmente aquelas que não têm condições financeiras para pagar terapia
+
+Descrição do Projeto:
+Este projeto consiste no desenvolvimento de um aplicativo inovador que visa crie um aplicativo de crie um saas funcional e empático com foco em saúde mental, bem-estar emocional e apoio psicológico para pessoas que sofrem de depressão, ansiedade ou outras questões emocionais, especialmente aquelas que não têm condições financeiras para pagar terapia. A solução será desenvolvida com foco em proporcionar uma experiência excepcional ao usuário, combinando design moderno, funcionalidades intuitivas e alta performance.
+
+O aplicativo será construído utilizando React/Next.js com TypeScript e estilizado com Tailwind CSS para garantir uma interface moderna, responsiva e altamente personalizável. A solução seguirá as melhores práticas de desenvolvimento, garantindo escalabilidade, segurança e facilidade de manutenção. A interface será responsiva e adaptável a diferentes dispositivos, oferecendo uma experiência consistente em todas as plataformas.
+
+Objetivo Principal:
+Este projeto visa desenvolver um aplicativo completo e profissional para crie um aplicativo de crie um saas funcional e empático com foco em saúde mental, bem-estar emocional e apoio psicológico para pessoas que sofrem de depressão, ansiedade ou outras questões emocionais, especialmente aquelas que não têm condições financeiras para pagar terapia. A solução será desenvolvida com foco em proporcionar uma experiência excepcional ao usuário, garantindo facilidade de uso, performance e segurança.
+
+## Sistema de Temas
+
+### 1. Tema Claro (Light Mode):
+
+**Cores Principais:**
+
+- Fundo Principal: #FFFFFF
+- Fundo Secundário: #F8FAFC
+- Texto Principal: #1E293B
+- Texto Secundário: #64748B
+- Primária: #3B82F6
+- Secundária: #10B981
+- Accent: #8B5CF6
+- Bordas: #E2E8F0
+- Sombras: rgba(0, 0, 0, 0.1)
+
+### 2. Tema Escuro (Dark Mode):
+
+**Cores Principais:**
+
+- Fundo Principal: #0F172A
+- Fundo Secundário: #1E293B
+- Texto Principal: #F8FAFC
+- Texto Secundário: #CBD5E1
+- Primária: #60A5FA
+- Secundária: #34D399
+- Accent: #A78BFA
+- Bordas: #334155
+- Sombras: rgba(0, 0, 0, 0.25)
+
+## Contraste e Acessibilidade
+
+- Todas as cores foram selecionadas para manter uma relação de contraste mínima de 4.5:1
+- Elementos interativos têm contraste aumentado
+- Indicadores visuais de foco são claros em ambos os temas
+- Estados hover e active têm variações de cor perceptíveis
+- Textos mantêm legibilidade em todos os fundos
+
+## Transição entre Temas
+
+- Animação suave de 0.3s
+- Transição de cores com timing-function: ease-in-out
+- Persistência da preferência do usuário
+- Respeito às configurações do sistema
+- Alternância via ícone na barra de navegação
+
+## Principais Benefícios
+
+- Interface moderna e intuitiva
+- Sistema completo de autenticação e autorização
+- Dashboard personalizado para cada usuário
+- Relatórios e análises em tempo real de bem-estar emocional
+- Ferramentas de saúde mental integradas
+- Suporte a múltiplos dispositivos e plataformas
+- Backup automático de dados
+- Sistema de notificações empáticas em tempo real
+
+**IMPORTANTE:** Para agilizar o desenvolvimento inicial e permitir testes rápidos, o sistema de login está configurado para aceitar qualquer email/senha, sem necessidade de banco de dados. Isso permite que você teste e valide o fluxo completo do aplicativo imediatamente. A integração com banco de dados pode ser implementada posteriormente.
+
+## Estrutura do Aplicativo
+
+### Páginas e Rotas:
+
+- `/login` - Página de autenticação (aceita qualquer email/senha para teste)
+- `/register` - Cadastro de usuários (registro automático para teste)
+- `/dashboard` - Dashboard principal de bem-estar
+- `/mood` - Registro de humor diário
+- `/chat` - Chat de desabafo (simulado)
+- `/habits` - Hábitos e metas de bem-estar
+- `/mindfulness` - Exercícios de mindfulness e respiração
+- `/sos` - Modo crise/emergência
+- `/resources` - Recursos e ajuda profissional
+- `/profile` - Perfil do usuário
+- `/settings` - Configurações
+
+### Componentes da Interface:
+
+#### Login (/login):
+
+- Campo de email com validação
+- Campo de senha com toggle de visibilidade
+- Botão "Lembrar-me"
+- Link para recuperação de senha
+- Botão de login com efeito de loading
+- Opção de login com Google/GitHub
+- Link para página de registro
+- Mensagens acolhedoras de saúde mental
+
+#### Registro (/register):
+
+- Campos: nome, email, senha, confirmar senha
+- Checkbox para aceitar termos de uso e privacidade
+- Validação em tempo real
+- Feedback visual de força da senha
+- Botão de registro com loading state
+- Disclaimer sobre não substituir terapia profissional
+
+#### Dashboard (/dashboard):
+
+- Sidebar responsiva com navegação
+- Header com perfil e notificações
+- Cards de estatísticas de bem-estar com animações
+- Registro rápido de humor
+- Acesso rápido ao modo SOS
+- Mensagem motivacional do dia
+- Progresso de hábitos saudáveis
+- Lista de atividades de bem-estar recentes
+
+#### Registro de Humor (/mood):
+
+- Escala visual de humor com emojis (😊 😐 😢)
+- Campo de texto para desabafo opcional
+- Gráfico de humor semanal/mensal
+- Histórico de registros anteriores
+- Análise de padrões emocionais
+- Exportação de dados de humor
+
+#### Chat de Desabafo (/chat):
+
+- Interface de chat limpa e acolhedora
+- Mensagens de boas-vindas empáticas
+- Balões de conversa com design terapêutico
+- Simulação de respostas de apoio emocional
+- Botões de ação rápida (exercícios, recursos)
+- Histórico de conversas organizadas por data
+- Botão para novo chat com confirmação
+
+#### Hábitos e Metas (/habits):
+
+- Lista de até 3 hábitos por vez
+- Metas pequenas e alcançáveis
+- Sistema de streaks e conquistas
+- Feedback positivo visual
+- Gráficos de progresso
+- Sugestões de hábitos saudáveis
+
+#### Mindfulness (/mindfulness):
+
+- Exercícios de respiração guiada com animações
+- Timer para meditação
+- Sons calmantes (chuva, floresta, ondas)
+- Exercícios de atenção plena
+- Diário de gratidão
+- Reflexões guiadas
+
+#### Modo SOS (/sos):
+
+- Interface de crise com cores calmantes
+- Exercícios de respiração de emergência
+- Sons calmantes instantâneos
+- Frases de acolhimento
+- Contatos de emergência (CVV: 188)
+- Plano de segurança pessoal
+- Links para CAPS e profissionais
+
+#### Recursos (/resources):
+
+- Biblioteca de artigos de saúde mental
+- Vídeos educativos sobre bem-estar
+- Testes de autoavaliação (PHQ-9, GAD-7)
+- Busca de psicólogos com preços acessíveis
+- Links para apoio gratuito
+- FAQ sobre saúde mental
+
+## Design System
+
+### Cores principais:
+
+- Primária: #3B82F6 (azul tranquilizante)
+- Secundária: #10B981 (verde esperança)
+- Accent: #8B5CF6 (roxo calmo)
+- Crise: #EF4444 (vermelho para emergências)
+
+### Tipografia:
+
+- Títulos: Inter (bold)
+- Texto: Inter (regular)
+- Texto terapêutico: Inter (light/regular)
+- Sombras e elevação suaves
+- Bordas arredondadas: 8px-12px
+- Animações suaves: 0.2s ease-in-out
+
+### Imagens Recomendadas (Gratuitas):
+
+**Unsplash:**
+
+- Background login: "peaceful nature landscape"
+- Avatares: "calm, peaceful people"
+- Icons: "mental health symbols"
+
+**Undraw.co:**
+
+- Ilustrações para páginas de bem-estar
+- Gráficos de saúde mental
+- Ícones de mindfulness
+
+### Recursos de UI/UX:
+
+- Feedback visual empático em todas ações
+- Tooltips informativos sobre saúde mental
+- Skeleton loading states suaves
+- Mensagens de erro compreensivas e acolhedoras
+- Micro-interações calmantes em botões
+- Dark/Light mode toggle
+- Modo de alto contraste para acessibilidade
+
+### Animações:
+
+- Fade-in suave ao carregar páginas
+- Slide-in para sidebars
+- Scale + fade para modais
+- Pulse calmante para notificações
+- Shimmer suave para loading states
+- Animações de respiração para exercícios
+
+### Responsividade:
+
+- Mobile: 320px - 480px
+- Tablet: 481px - 768px
+- Desktop: 769px+
+- Layout adaptativo
+- Menu hamburguer em mobile
+- Grid responsivo para cards
+- Touch-friendly para dispositivos móveis
+
+### Segurança Visual:
+
+- Feedback de força de senha
+- Disclaimers sobre privacidade
+- Avisos sobre não substituir terapia profissional
+- Timeout de sessão por segurança
+- Criptografia visual de dados sensíveis
+
+## Estrutura Detalhada do Aplicativo
+
+### 1. Sistema de Autenticação:
+
+- Login simplificado (email/senha)
+- Cadastro rápido com validações
+- Perfil personalizado de bem-estar
+- Configurações de privacidade
+- Recuperação de senha
+- Autenticação social (Google/GitHub)
+- Sessões seguras
+- Logout automático
+- Histórico de acesso
+
+### 2. Features Específicas de Bem-estar:
+
+- Sistema de notificações empáticas
+- Filtros para registros de humor
+- Histórico de atividades de bem-estar
+- Configurações personalizadas de lembretes
+- Relatórios de progresso emocional
+- Perfil de saúde mental do usuário
+- Feed de dicas de bem-estar
+- Chat simulado de apoio emocional
+- Backup automático de dados sensíveis
+- Temas personalizáveis para conforto visual
+
+### 3. Interface Principal:
+
+- Dashboard de bem-estar personalizado
+- Navegação intuitiva com ícones empáticos
+- Área de notificações motivacionais
+- Menu responsivo com acesso rápido ao SOS
+- Temas claro/escuro para conforto visual
+- Modo noturno com cores calmantes
+- Acessibilidade para pessoas com deficiência
+- Animações suaves e não agressivas
+- Feedback visual positivo
+- Tooltips educativos sobre saúde mental
+
+### 4. Design System Terapêutico:
+
+- Cores adaptadas ao bem-estar emocional
+- Tipografia legível e acolhedora
+- Ícones relacionados à saúde mental
+- Animações calmantes
+- Componentes reutilizáveis empáticos
+- Grid responsivo adaptável
+- Layouts que promovem calma
+- Espaçamento que evita sobrecarga visual
+- Sombras suaves e reconfortantes
+- Transições fluidas e não agressivas
+
+### 5. Recursos Mobile Específicos:
+
+- Design mobile-first para acessibilidade
+- Gestos e toques otimizados
+- Performance otimizada para dispositivos mais simples
+- Notificações push motivacionais
+- Modo offline para exercícios de respiração
+- Cache inteligente para recursos de emergência
+- Acessibilidade para diferentes necessidades
+- Interface adaptável para diferentes tamanhos de tela
+
+### 6. Elementos de Interface Especializados:
+
+- Loading states com mensagens motivacionais
+- Feedback visual positivo e encorajador
+- Tooltips educativos sobre saúde mental
+- Modais interativos para exercícios
+- Formulários otimizados para sensibilidade emocional
+- Cards animados com informações de bem-estar
+- Gráficos interativos de progresso emocional
+- Sliders para escalas de humor
+- Dropdowns personalizados com opções terapêuticas
+
+### 7. Recursos Extras de Apoio:
+
+- Compartilhamento de progresso (opcional)
+- Exportação de dados para profissionais
+- Backups automáticos seguros
+- Tutorial interativo sobre saúde mental
+- Documentação sobre recursos disponíveis
+- FAQ sobre bem-estar emocional
+- Links para suporte profissional
+- Blog integrado com dicas de saúde mental
+- Recursos educacionais sobre ansiedade e depressão
+
+### 8. Tecnologias Base:
+
+- Frontend moderno (React/Next.js com PWA)
+- Sistema de estilos empáticos (Tailwind CSS)
+- Sistema de animações calmantes
+- Sistema de ícones relacionados à saúde mental
+- Sistema de formulários sensíveis
+- Sistema de validação compreensivo
+- Gerenciamento de estado para dados sensíveis
+- Sistema de armazenamento local seguro
+- Sistema de testes para funcionalidades críticas
+- Sistema de deploy seguro
+
+### 9. Estilização e UI Empática:
+
+- Tailwind CSS para estilização moderna e responsiva
+- Componentes reutilizáveis com foco em bem-estar
+- Sistema de cores que promove calma
+- Utilitários de layout que evitam sobrecarga
+- Animações e transições suaves e não agressivas
+- Responsividade mobile-first
+- Temas claro/escuro com cores terapêuticas
+- Acessibilidade integrada (WCAG)
+- Performance otimizada
+- Consistência visual em toda a aplicação
+
+### 10. Stack Tecnológica:
+
+- React/Next.js para estrutura e componentes
+- TypeScript para tipagem e segurança
+- Tailwind CSS para estilização empática
+- Next.js App Router para roteamento
+- React Server Components
+- API Routes para backend simulado
+- Context API para estado global
+- LocalStorage para dados locais seguros
+- React Hooks para funcionalidades específicas
+- sistema PWA
+
+### 11. Boas Práticas de Saúde Mental:
+
+- Componentes reutilizáveis empáticos
+- Tipagem forte com TypeScript
+- Estilização consistente com Tailwind
+- Performance otimizada para dispositivos variados
+- Acessibilidade (WCAG) para inclusão
+- Disclaimers apropriados sobre saúde mental
+- Código limpo e organizado
+- Documentação clara sobre funcionalidades
+- Versionamento semântico
+- Privacidade e segurança de dados sensíveis
+
+## Observação Final
+
+Comece implementando a página de login (que aceita qualquer credencial), depois o registro com disclaimers apropriados, e então o dashboard de bem-estar com acesso às principais funcionalidades. Use Tailwind CSS para estilização rápida, consistente e empática, sempre priorizando a experiência do usuário em situação de vulnerabilidade emocional.

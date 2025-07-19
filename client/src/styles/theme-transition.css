@@ -1,0 +1,25 @@
+/* Transições básicas para elementos da interface */
+
+/* Transições suaves para elementos comuns */
+.MuiPaper-root,
+.MuiCard-root,
+.MuiAppBar-root,
+.MuiButton-root,
+.MuiIconButton-root,
+.MuiTextField-root,
+.MuiInputBase-root,
+.MuiDrawer-paper {
+  transition: all 0.3s ease-in-out !important;
+}
+
+/* Transições para ícones */
+svg {
+  transition: fill 0.3s ease, stroke 0.3s ease;
+}
+
+/* Respeitar preferências de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
