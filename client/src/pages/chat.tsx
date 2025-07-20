@@ -67,15 +67,17 @@ export default function Chat() {
   };
 
   useEffect(() => {
+    console.log('useEffect - mensagens atualizadas:', messages.length, messages);
     scrollToBottom();
   }, [messages]);
 
   const sendMessage = async () => {
     if (!inputMessage.trim()) return;
 
+    const userMessageText = inputMessage;
     const newMessage: Message = {
       id: Date.now().toString(),
-      text: inputMessage,
+      text: userMessageText,
       sender: 'user',
       timestamp: new Date(),
     };
@@ -85,28 +87,42 @@ export default function Chat() {
     setIsTyping(true);
 
     try {
+      console.log('=== INÍCIO DO ENVIO ===');
       console.log('Enviando mensagem para webhook:', {
-        message: inputMessage,
+        message: userMessageText,
         sessionId: sessionId,
         url: N8N_WEBHOOK_URL
       });
 
       // Usando fetch nativo em vez de axios
-      const response = await testWebhook(inputMessage, sessionId);
+      const response = await testWebhook(userMessageText, sessionId);
 
-      console.log('Resposta do webhook recebida:', response);
+      console.log('=== RESPOSTA RECEBIDA ===');
+      console.log('Resposta completa:', JSON.stringify(response, null, 2));
+      console.log('response.message existe?', !!response?.message);
+      console.log('Valor de response.message:', response?.message);
       
-      if (response && response.message) {
-        const botMessage: Message = {
-          id: Date.now().toString() + '_bot',
-          text: response.message,
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botMessage]);
-      } else {
-        throw new Error('Resposta inválida do servidor');
-      }
+      // Força a criação da mensagem do bot
+      const botMessageText = response?.message || 'Resposta não encontrada';
+      const botMessage: Message = {
+        id: Date.now().toString() + '_bot',
+        text: botMessageText,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      
+      console.log('=== CRIANDO MENSAGEM BOT ===');
+      console.log('Mensagem do bot:', JSON.stringify(botMessage, null, 2));
+      
+      // Atualiza as mensagens
+      setMessages(prev => {
+        const newMessages = [...prev, botMessage];
+        console.log('=== ATUALIZANDO ESTADO ===');
+        console.log('Mensagens anteriores:', prev.length);
+        console.log('Novas mensagens:', newMessages.length);
+        console.log('Última mensagem:', newMessages[newMessages.length - 1]);
+        return newMessages;
+      });
       
       setIsTyping(false);
       
@@ -114,24 +130,12 @@ export default function Chat() {
       if (response?.sessionId && response.sessionId !== sessionId) {
         setSessionId(response.sessionId);
       }
+      
+      console.log('=== ENVIO CONCLUÍDO ===');
     } catch (error: any) {
-      console.error('Erro ao enviar mensagem para webhook:', error);
+      console.error('=== ERRO NO ENVIO ===', error);
       
-      let errorMessage = 'Erro ao conectar com o agente de IA. Tente novamente mais tarde.';
-      
-      if (error.response) {
-        // Erro de resposta do servidor
-        console.error('Erro de resposta:', error.response.status, error.response.data);
-        errorMessage = `Erro do servidor (${error.response.status}): ${error.response.data?.message || 'Erro desconhecido'}`;
-      } else if (error.request) {
-        // Erro de rede/timeout
-        console.error('Erro de rede:', error.request);
-        errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
-      } else {
-        // Outro tipo de erro
-        console.error('Erro:', error.message);
-        errorMessage = `Erro: ${error.message}`;
-      }
+      const errorMessage = `Erro: ${error.message || 'Erro desconhecido'}`;
       
       setMessages(prev => [...prev, {
         id: (Date.now() + 2).toString(),
@@ -209,6 +213,7 @@ export default function Chat() {
 
         {/* Chat Messages */}
         <div className="h-96 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900/50">
+          {console.log('Renderizando mensagens:', messages.length, messages)}
           {messages.map((message) => (
             <div
               key={message.id}
