@@ -3,53 +3,53 @@
 @tailwind utilities;
 
 :root {
-  /* Light theme - Nova paleta verde menta suave */
-  --background: 140 50% 98%; /* #F7FCF8 - Branco Verde */
-  --foreground: 150 15% 43%; /* #5E7A6E - Verde Floresta Suave */
-  --muted: 150 35% 82%; /* #C5E0D5 - Verde Água Clara para áreas muted */
-  --muted-foreground: 150 15% 43%; /* #5E7A6E - Verde Floresta Suave */
-  --popover: 140 50% 98%; /* #F7FCF8 - Branco Verde */
-  --popover-foreground: 150 15% 43%; /* #5E7A6E - Verde Floresta Suave */
-  --card: 140 50% 98%; /* #F7FCF8 - Branco Verde */
-  --card-foreground: 150 15% 43%; /* #5E7A6E - Verde Floresta Suave */
-  --border: 150 40% 87%; /* #BCDED6 - Verde Esbranquiçado para bordas */
-  --input: 150 40% 87%; /* #BCDED6 - Verde Esbranquiçado para inputs */
+  /* Light theme - Nova paleta azul vibrante */
+  --background: 220 100% 99%; /* #F9FBFD - Quase branco com toque de azul */
+  --foreground: 0 0% 13%; /* #222222 - Alto contraste */
+  --muted: 220 14% 96%; /* #F1F5F9 - Cinza muito claro */
+  --muted-foreground: 220 9% 46%; /* #6B7280 - Cinza neutro */
+  --popover: 0 0% 100%; /* #FFFFFF - Branco puro */
+  --popover-foreground: 0 0% 13%; /* #222222 - Alto contraste */
+  --card: 0 0% 100%; /* #FFFFFF - Branco puro para cartões neutros */
+  --card-foreground: 0 0% 13%; /* #222222 - Alto contraste */
+  --border: 220 13% 91%; /* #E2E8F0 - Borda sutil */
+  --input: 220 13% 91%; /* #E2E8F0 - Input sutil */
   
-  /* Primary - Verde Menta Suave */
-  --primary: 150 25% 62%; /* #82B29A - Verde Menta Suave */
-  --primary-foreground: 140 50% 98%; /* #F7FCF8 - Branco Verde para contraste */
+  /* Primary - Azul médio vibrante (foco e ações) */
+  --primary: 220 91% 63%; /* #4C7EF3 - Azul médio vibrante */
+  --primary-foreground: 0 0% 100%; /* #FFFFFF - Branco para contraste */
   
-  /* Secondary - Verde Água Clara */
-  --secondary: 150 35% 82%; /* #C5E0D5 - Verde Água Clara */
-  --secondary-foreground: 150 15% 43%; /* #5E7A6E - Verde Floresta Suave */
+  /* Secondary - Verde água (apoio) */
+  --secondary: 158 64% 52%; /* #6ED4B2 - Verde água */
+  --secondary-foreground: 0 0% 13%; /* #222222 - Alto contraste */
   
-  /* Accent - Verde Esbranquiçado */
-  --accent: 150 40% 87%; /* #BCDED6 - Verde Esbranquiçado */
-  --accent-foreground: 150 15% 43%; /* #5E7A6E - Verde Floresta Suave */
+  /* Accent - Rosa suave (apoio emocional) */
+  --accent: 355 100% 78%; /* #FF8C94 - Rosa suave */
+  --accent-foreground: 0 0% 13%; /* #222222 - Alto contraste */
   
-  /* Destructive - Crisis red (used sparingly) */
-  --destructive: 0 84% 60%; /* #EF4444 - Emergency red */
-  --destructive-foreground: 140 50% 98%;
+  /* Destructive - Rosa suave para apoio emocional */
+  --destructive: 355 100% 78%; /* #FF8C94 - Rosa suave */
+  --destructive-foreground: 0 0% 13%; /* #222222 - Alto contraste */
   
-  --ring: 150 25% 62%;
-  --radius: 0.75rem; /* Rounded corners for comfort */
+  --ring: 220 91% 63%; /* #4C7EF3 - Azul médio vibrante */
+  --radius: 1rem; /* 16px - Bordas arredondadas conforme especificado */
   
-  /* Chart colors for mood tracking - nova paleta verde menta */
-  --chart-1: 150 25% 62%; /* #82B29A - Verde Menta Suave */
-  --chart-2: 150 35% 82%; /* #C5E0D5 - Verde Água Clara */
-  --chart-3: 150 40% 87%; /* #BCDED6 - Verde Esbranquiçado */
-  --chart-4: 150 15% 43%; /* #5E7A6E - Verde Floresta Suave */
-  --chart-5: 140 50% 98%; /* #F7FCF8 - Branco Verde */
+  /* Chart colors for mood tracking - nova paleta com gradientes */
+  --chart-1: 220 91% 63%; /* #4C7EF3 - Azul médio vibrante */
+  --chart-2: 158 64% 52%; /* #6ED4B2 - Verde água */
+  --chart-3: 355 100% 78%; /* #FF8C94 - Rosa suave */
+  --chart-4: 45 100% 70%; /* #FFD166 - Amarelo quente para ícones de humor */
+  --chart-5: 28 100% 55%; /* #F8961E - Laranja para ícones de humor */
   
-  /* Sidebar colors - nova paleta verde menta */
-  --sidebar-background: 140 50% 98%; /* #F7FCF8 - Branco Verde */
-  --sidebar-foreground: 150 15% 43%; /* #5E7A6E - Verde Floresta Suave */
-  --sidebar-primary: 150 25% 62%; /* #82B29A - Verde Menta Suave */
-  --sidebar-primary-foreground: 140 50% 98%; /* #F7FCF8 - Branco Verde */
-  --sidebar-accent: 150 35% 82%; /* #C5E0D5 - Verde Água Clara */
-  --sidebar-accent-foreground: 150 15% 43%; /* #5E7A6E - Verde Floresta Suave */
-  --sidebar-border: 150 40% 87%; /* #BCDED6 - Verde Esbranquiçado */
-  --sidebar-ring: 150 25% 62%; /* #82B29A - Verde Menta Suave */
+  /* Sidebar colors - nova paleta azul vibrante */
+  --sidebar-background: 220 100% 99%; /* #F9FBFD - Quase branco com toque de azul */
+  --sidebar-foreground: 0 0% 13%; /* #222222 - Alto contraste */
+  --sidebar-primary: 220 91% 63%; /* #4C7EF3 - Azul médio vibrante */
+  --sidebar-primary-foreground: 0 0% 100%; /* #FFFFFF - Branco */
+  --sidebar-accent: 158 64% 52%; /* #6ED4B2 - Verde água */
+  --sidebar-accent-foreground: 0 0% 13%; /* #222222 - Alto contraste */
+  --sidebar-border: 220 13% 91%; /* #E2E8F0 - Borda sutil */
+  --sidebar-ring: 220 91% 63%; /* #4C7EF3 - Azul médio vibrante */
 }
 
 
@@ -184,18 +184,58 @@
 
 /* Special styles for crisis/SOS elements */
 .crisis-glow {
-  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2), 0 0 8px rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 0 1px rgba(255, 140, 148, 0.2), 0 0 8px rgba(255, 140, 148, 0.1);
   animation: pulseSoft 2s ease-in-out infinite;
 }
 
 /* Mood chart customizations */
 .mood-chart-bar {
   transition: all 0.3s ease;
-  border-radius: 4px 4px 0 0;
+  border-radius: 16px 16px 0 0;
 }
 
 .mood-chart-bar:hover {
   transform: scaleY(1.05);
+}
+
+/* Gradientes para ícones de humor */
+.mood-icon-gradient {
+  background: linear-gradient(135deg, #FFD166 0%, #F8961E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.mood-icon-warm {
+  background: linear-gradient(135deg, #FFD166 0%, #FF8C94 50%, #F8961E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Espaçamento generoso entre seções */
+.section-spacing {
+  margin-bottom: 3rem; /* 48px */
+  padding: 2rem; /* 32px */
+}
+
+.card-spacing {
+  padding: 2rem; /* 32px */
+  margin-bottom: 1.5rem; /* 24px */
+}
+
+/* Sombras leves conforme especificado */
+.shadow-soft {
+  box-shadow: 0 4px 20px rgba(76, 126, 243, 0.08);
+}
+
+.shadow-card {
+  box-shadow: 0 2px 12px rgba(76, 126, 243, 0.06);
+}
+
+/* Bordas arredondadas padrão */
+.rounded-standard {
+  border-radius: 16px;
 }
 
 /* Gratitude journal styling */
