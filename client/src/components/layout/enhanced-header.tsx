@@ -262,7 +262,11 @@ export function EnhancedHeader() {
           <Settings sx={{ mr: 2, fontSize: 20, color: 'primary.main' }} />
           Configurações
         </MenuItem>
-        <MenuItem onClick={signOut}>
+        <MenuItem onClick={async () => {
+          await signOut();
+          navigate('/login');
+          handleUserMenuClose();
+        }}>
           <Logout sx={{ mr: 2, fontSize: 20, color: 'error.main' }} />
           Sair do Refúgio
         </MenuItem>

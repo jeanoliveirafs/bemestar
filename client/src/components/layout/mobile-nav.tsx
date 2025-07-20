@@ -68,8 +68,9 @@ export function MobileNav({ isOpen, onClose, navItems }: MobileNavProps) {
               </div>
             </div>
             <button
-              onClick={() => {
-                signOut();
+              onClick={async () => {
+                await signOut();
+                navigate('/login');
                 onClose();
               }}
               className="block w-full text-left px-3 py-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"

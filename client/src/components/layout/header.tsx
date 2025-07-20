@@ -69,7 +69,10 @@ export function Header() {
                 <span className="text-sm font-medium text-slate-900 dark:text-white">
                   {user?.name}
                 </span>
-                <Button onClick={signOut} variant="ghost" size="sm">
+                <Button onClick={async () => {
+                  await signOut();
+                  navigate('/login');
+                }} variant="ghost" size="sm">
                   <i className="fas fa-sign-out-alt"></i>
                 </Button>
               </div>
