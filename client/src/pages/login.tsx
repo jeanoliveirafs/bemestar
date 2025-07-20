@@ -240,7 +240,7 @@ export default function Login() {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-blue-700 dark:text-blue-300">
-                      <strong>Demo:</strong> Use qualquer email e senha para testar a plataforma.
+                      <strong>Projeto em desenvolvimento:</strong> Para testar crie uma conta e depois faça o login.
                     </p>
                   </div>
                 </div>
