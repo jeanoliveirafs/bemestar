@@ -85,7 +85,7 @@ export const lightTheme = createTheme({
         root: {
           backgroundColor: '#FFFFFF', // Branco puro para cartões neutros
           border: 'none', // Sem borda para design mais limpo
-          boxShadow: '0 4px 20px rgba(76, 126, 243, 0.08)', // Sombra leve com cor primária
+          boxShadow: '0 8px 32px rgba(76, 126, 243, 0.15), 0 2px 8px rgba(76, 126, 243, 0.1)', // Sombra azul destacada
           borderRadius: 16, // Bordas arredondadas conforme especificado
           padding: '24px', // Bastante espaçamento interno
         },

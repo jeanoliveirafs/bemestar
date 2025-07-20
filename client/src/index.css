@@ -224,13 +224,13 @@
   margin-bottom: 1.5rem; /* 24px */
 }
 
-/* Sombras leves conforme especificado */
+/* Sombras azuis destacadas para cards */
 .shadow-soft {
-  box-shadow: 0 4px 20px rgba(76, 126, 243, 0.08);
+  box-shadow: 0 8px 32px rgba(76, 126, 243, 0.15), 0 2px 8px rgba(76, 126, 243, 0.1);
 }
 
 .shadow-card {
-  box-shadow: 0 2px 12px rgba(76, 126, 243, 0.06);
+  box-shadow: 0 6px 24px rgba(76, 126, 243, 0.12), 0 2px 8px rgba(76, 126, 243, 0.08);
 }
 
 /* Bordas arredondadas padrão */
