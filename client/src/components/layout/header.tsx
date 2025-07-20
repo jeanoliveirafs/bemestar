@@ -5,7 +5,7 @@ import { MobileNav } from './mobile-nav';
 import { useLocation } from 'wouter';
 
 export function Header() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const [location, navigate] = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
@@ -69,7 +69,7 @@ export function Header() {
                 <span className="text-sm font-medium text-slate-900 dark:text-white">
                   {user?.name}
                 </span>
-                <Button onClick={logout} variant="ghost" size="sm">
+                <Button onClick={signOut} variant="ghost" size="sm">
                   <i className="fas fa-sign-out-alt"></i>
                 </Button>
               </div>

@@ -40,7 +40,7 @@ import { useThemeContext } from '@/contexts/theme-context';
 import { LottieAnimation, heartbeatAnimation } from '@/components/ui/lottie-animation';
 
 export function EnhancedHeader() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const [location, navigate] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
@@ -194,62 +194,7 @@ export function EnhancedHeader() {
               </IconButton>
             </motion.div>
 
-            {/* Dark Mode Toggle */}
-            <motion.div
-              whileHover={{ scale: 1.1, rotate: 180 }}
-              transition={{ duration: 0.3 }}
-            >
-              <IconButton 
-                onClick={toggleTheme} 
-                sx={{ 
-                  background: isDarkMode 
-                    ? 'rgba(255, 255, 255, 0.15)' 
-                    : 'rgba(0, 0, 0, 0.08)',
-                  backdropFilter: 'blur(10px)',
-                  border: `1px solid ${isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.12)'}`,
-                  width: { xs: 44, sm: 48 },
-                  height: { xs: 44, sm: 48 },
-                  borderRadius: 2,
-                  '&:hover': {
-                    background: isDarkMode 
-                      ? 'rgba(255, 255, 255, 0.25)' 
-                      : 'rgba(0, 0, 0, 0.12)',
-                    transform: 'scale(1.1) rotate(15deg)',
-                    borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.2)',
-                  },
-                  transition: 'all 0.3s ease',
-                  // Ensure visibility on all backgrounds
-                  boxShadow: isDarkMode 
-                    ? '0 2px 8px rgba(0, 0, 0, 0.3)' 
-                    : '0 2px 8px rgba(0, 0, 0, 0.15)',
-                }}
-              >
-                <motion.div
-                  key={isDarkMode ? 'dark' : 'light'}
-                  initial={{ opacity: 0, rotate: -180 }}
-                  animate={{ opacity: 1, rotate: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {isDarkMode ? (
-                    <LightMode sx={{ 
-                      color: '#FFD700',
-                      fontSize: { xs: 20, sm: 24 },
-                      filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))',
-                      // Ensure high contrast
-                      textShadow: '0 0 4px rgba(255, 215, 0, 0.8)'
-                    }} />
-                  ) : (
-                    <DarkMode sx={{ 
-                      color: '#1565C0',
-                      fontSize: { xs: 20, sm: 24 },
-                      filter: 'drop-shadow(0 0 8px rgba(21, 101, 192, 0.8))',
-                      // Ensure high contrast
-                      textShadow: '0 0 4px rgba(21, 101, 192, 0.8)'
-                    }} />
-                  )}
-                </motion.div>
-              </IconButton>
-            </motion.div>
+            {/* Toggle de tema removido - tema fixo */}
 
             {/* User Menu */}
             <motion.div
@@ -317,7 +262,7 @@ export function EnhancedHeader() {
           <Settings sx={{ mr: 2, fontSize: 20, color: 'primary.main' }} />
           Configurações
         </MenuItem>
-        <MenuItem onClick={logout}>
+        <MenuItem onClick={signOut}>
           <Logout sx={{ mr: 2, fontSize: 20, color: 'error.main' }} />
           Sair do Refúgio
         </MenuItem>

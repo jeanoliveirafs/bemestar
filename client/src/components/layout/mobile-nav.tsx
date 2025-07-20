@@ -15,7 +15,7 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ isOpen, onClose, navItems }: MobileNavProps) {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const [location, navigate] = useLocation();
 
   const handleNavigation = (path: string) => {
@@ -23,11 +23,7 @@ export function MobileNav({ isOpen, onClose, navItems }: MobileNavProps) {
     onClose();
   };
 
-  const toggleDarkMode = () => {
-    document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
-    localStorage.setItem('darkMode', isDark.toString());
-  };
+  // Função de toggle removida - tema fixo
 
   if (!isOpen) return null;
 
@@ -58,16 +54,7 @@ export function MobileNav({ isOpen, onClose, navItems }: MobileNavProps) {
             Modo Crise (SOS)
           </button>
           
-          {/* Dark Mode Toggle */}
-          <button
-            onClick={toggleDarkMode}
-            className="block w-full text-left px-3 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-          >
-            <i className="fas fa-moon dark:hidden w-5 mr-3"></i>
-            <i className="fas fa-sun hidden dark:inline w-5 mr-3"></i>
-            <span className="dark:hidden">Modo escuro</span>
-            <span className="hidden dark:inline">Modo claro</span>
-          </button>
+          {/* Toggle de tema removido - tema fixo */}
           
           {/* User Info */}
           <div className="border-t border-slate-200 dark:border-slate-700 pt-2 mt-2">
@@ -82,7 +69,7 @@ export function MobileNav({ isOpen, onClose, navItems }: MobileNavProps) {
             </div>
             <button
               onClick={() => {
-                logout();
+                signOut();
                 onClose();
               }}
               className="block w-full text-left px-3 py-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Box,
@@ -7,7 +7,6 @@ import {
   TextField,
   Button,
   Switch,
-  FormControlLabel,
   Select,
   MenuItem,
   FormControl,
@@ -15,11 +14,11 @@ import {
   Avatar,
   IconButton,
   Paper,
-  Divider,
   useTheme,
   useMediaQuery,
   InputAdornment,
-  Chip
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import {
   Settings,
@@ -29,44 +28,77 @@ import {
   CameraAlt,
   Language,
   Notifications,
-  Brightness4,
-  Brightness7,
   Accessibility,
   Save,
-  Visibility,
-  VisibilityOff,
-  Edit
+  Edit,
+  CheckCircle
 } from '@mui/icons-material';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { LottieAnimation, heartbeatAnimation } from '@/components/ui/lottie-animation';
+import { useUserProfile } from '@/hooks/use-user-profile';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function ProfileSettings() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { user } = useAuth();
+  const { profile, loading, error, updateProfile } = useUserProfile();
   
   // Estado dos formulários
   const [formData, setFormData] = useState({
-    username: 'João Silva',
-    email: 'joao.silva@email.com',
+    username: '',
+    email: '',
+    phone: '',
+    bio: '',
     language: 'pt-BR',
     notifications: true,
-    darkMode: theme.palette.mode === 'dark',
     accessibilityMode: false,
     profileImage: null as File | null
   });
 
-  const [showPassword, setShowPassword] = useState(false);
   const [editMode, setEditMode] = useState({
     username: false,
-    email: false
+    email: false,
+    phone: false,
+    bio: false
   });
+
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Preencher dados do formulário quando o perfil for carregado
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        username: profile.name || '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        bio: profile.bio || '',
+        language: profile.preferences?.language || 'pt-BR',
+        notifications: profile.preferences?.notifications ?? true,
+        accessibilityMode: profile.preferences?.accessibilityMode ?? false,
+        profileImage: null
+      });
+    } else if (user && !loading) {
+      // Fallback para dados do usuário autenticado
+      setFormData(prev => ({
+        ...prev,
+        username: user.name || user.email?.split('@')[0] || '',
+        email: user.email || ''
+      }));
+    }
+  }, [profile, user, loading]);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+    // Limpar mensagens de sucesso/erro ao editar
+    if (saveSuccess) setSaveSuccess(false);
+    if (saveError) setSaveError(null);
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,10 +111,46 @@ export default function ProfileSettings() {
     }
   };
 
-  const handleSaveSettings = () => {
-    // Placeholder para futura integração com Supabase
-    console.log('Configurações a serem salvas:', formData);
-    // TODO: Integrar com Supabase para salvar configurações do usuário
+  const handleSaveSettings = async () => {
+    setSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
+
+    try {
+      const updates = {
+        name: formData.username,
+        email: formData.email,
+        phone: formData.phone || null,
+        bio: formData.bio || null,
+        preferences: {
+          language: formData.language,
+          notifications: formData.notifications,
+          accessibilityMode: formData.accessibilityMode
+        }
+      };
+
+      const result = await updateProfile(updates);
+      
+      if (result.success) {
+        setSaveSuccess(true);
+        // Desabilitar modo de edição após salvar
+        setEditMode({
+          username: false,
+          email: false,
+          phone: false,
+          bio: false
+        });
+        
+        // Limpar mensagem de sucesso após 3 segundos
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        setSaveError(result.error || 'Erro ao salvar configurações');
+      }
+    } catch (err: any) {
+      setSaveError(err.message || 'Erro inesperado ao salvar');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const containerVariants = {
@@ -174,6 +242,38 @@ export default function ProfileSettings() {
           </Box>
         </motion.div>
 
+        {/* Loading State */}
+        {loading && (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+            <CircularProgress size={60} sx={{ color: theme.palette.primary.main }} />
+          </Box>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 4 }}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Success Message */}
+        {saveSuccess && (
+          <Alert 
+            severity="success" 
+            icon={<CheckCircle />}
+            sx={{ mb: 4 }}
+          >
+            Configurações salvas com sucesso!
+          </Alert>
+        )}
+
+        {/* Save Error Message */}
+        {saveError && (
+          <Alert severity="error" sx={{ mb: 4 }}>
+            {saveError}
+          </Alert>
+        )}
+
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -207,7 +307,7 @@ export default function ProfileSettings() {
                         background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`
                       }}
                     >
-                      {formData.username.charAt(0)}
+                      {formData.username.charAt(0).toUpperCase() || user?.name?.charAt(0).toUpperCase() || 'U'}
                     </Avatar>
                     <IconButton
                       component="label"
@@ -290,6 +390,81 @@ export default function ProfileSettings() {
                         <InputAdornment position="end">
                           <IconButton
                             onClick={() => setEditMode(prev => ({ ...prev, email: !prev.email }))}
+                            edge="end"
+                          >
+                            <Edit sx={{ fontSize: 20 }} />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: 2,
+                      }
+                    }}
+                  />
+                </Box>
+
+                {/* Phone Field */}
+                <Box mb={3}>
+                  <TextField
+                    fullWidth
+                    label="Telefone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    disabled={!editMode.phone}
+                    placeholder="(11) 99999-9999"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <i className="fas fa-phone" style={{ color: theme.palette.primary.main }} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setEditMode(prev => ({ ...prev, phone: !prev.phone }))}
+                            edge="end"
+                          >
+                            <Edit sx={{ fontSize: 20 }} />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: 2,
+                      }
+                    }}
+                  />
+                </Box>
+
+                {/* Bio Field */}
+                <Box mb={3}>
+                  <TextField
+                    fullWidth
+                    label="Biografia"
+                    multiline
+                    rows={3}
+                    value={formData.bio}
+                    onChange={(e) => handleInputChange('bio', e.target.value)}
+                    disabled={!editMode.bio}
+                    placeholder="Conte um pouco sobre você..."
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1 }}>
+                          <i className="fas fa-user-edit" style={{ color: theme.palette.primary.main }} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end" sx={{ alignSelf: 'flex-start', mt: 1 }}>
+                          <IconButton
+                            onClick={() => setEditMode(prev => ({ ...prev, bio: !prev.bio }))}
                             edge="end"
                           >
                             <Edit sx={{ fontSize: 20 }} />
@@ -454,7 +629,8 @@ export default function ProfileSettings() {
                   <AnimatedButton
                     onClick={handleSaveSettings}
                     size="large"
-                    startIcon={<Save />}
+                    disabled={saving || loading}
+                    startIcon={saving ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <Save />}
                     sx={{
                       px: 6,
                       py: 2,
@@ -464,11 +640,15 @@ export default function ProfileSettings() {
                       color: 'white',
                       '&:hover': {
                         background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+                      },
+                      '&:disabled': {
+                        background: 'rgba(0, 0, 0, 0.12)',
+                        color: 'rgba(0, 0, 0, 0.26)'
                       }
                     }}
-                    glow
+                    glow={!saving}
                   >
-                    Salvar Configurações
+                    {saving ? 'Salvando...' : 'Salvar Configurações'}
                   </AnimatedButton>
                 </Box>
               </AnimatedCard>
