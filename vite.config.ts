@@ -43,5 +43,7 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+    // Configuração para SPAs - resolve erro 404 ao atualizar página
+    historyApiFallback: true,
   },
 });
