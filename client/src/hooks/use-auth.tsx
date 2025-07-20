@@ -114,7 +114,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+      // Limpar estado local imediatamente
+      setUser(null);
+      // Redirecionar para login
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    }
   };
 
   return (
