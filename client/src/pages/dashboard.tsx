@@ -56,7 +56,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Mood Check */}
-      <Card className="mb-8">
+      <Card className="mb-8 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow duration-300">
         <CardContent className="pt-6">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4 text-center">
             Registro Rápido de Humor
@@ -74,7 +74,7 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
@@ -87,7 +87,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+        <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-secondary rounded-xl flex items-center justify-center">
@@ -100,7 +100,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+        <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center">
@@ -115,7 +115,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-800/30">
+        <Card className="bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-800/30 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
@@ -134,7 +134,7 @@ export default function Dashboard() {
       {/* Daily Message & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Daily Motivation */}
-        <Card className="bg-gradient-to-br from-primary to-accent text-white border-0">
+        <Card className="bg-gradient-to-br from-primary to-accent text-white border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow duration-300">
           <CardContent className="p-6">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
@@ -153,7 +153,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Quick Actions */}
-        <Card>
+        <Card className="shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow duration-300">
           <CardContent className="p-6">
             <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Ações Rápidas</h3>
             <div className="space-y-3">
@@ -204,7 +204,7 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Activities */}
-      <Card>
+      <Card className="shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow duration-300">
         <CardContent className="p-6">
           <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Atividades Recentes</h3>
           <div className="space-y-4">
