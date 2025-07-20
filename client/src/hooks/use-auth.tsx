@@ -89,7 +89,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: {
           data: {
             name: name
-          }
+          },
+          // Configuração para funcionar sem confirmação de email
+          emailRedirectTo: undefined
         }
       });
 

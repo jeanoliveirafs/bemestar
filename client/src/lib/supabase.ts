@@ -6,11 +6,14 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 
 /**
  * Cliente Supabase configurado para autenticação e operações de banco de dados
+ * Configurado para funcionar sem confirmação de email
  */
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    // Configurações para funcionar sem confirmação de email
+    flowType: 'pkce'
   }
 })
