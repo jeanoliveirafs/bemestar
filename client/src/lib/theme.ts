@@ -83,11 +83,12 @@ export const lightTheme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          backgroundColor: '#FFFFFF', // Branco puro para cartões neutros
-          border: 'none', // Sem borda para design mais limpo
-          boxShadow: '0 8px 32px rgba(76, 126, 243, 0.15), 0 2px 8px rgba(76, 126, 243, 0.1)', // Sombra azul destacada
-          borderRadius: 16, // Bordas arredondadas conforme especificado
-          padding: '24px', // Bastante espaçamento interno
+          // Removendo estilos que podem interferir com AnimatedCard
+          // backgroundColor: '#FFFFFF',
+          // border: 'none',
+          // boxShadow: '0 8px 32px rgba(76, 126, 243, 0.15), 0 2px 8px rgba(76, 126, 243, 0.1)',
+          // borderRadius: 16,
+          // padding: '24px',
         },
       },
     },

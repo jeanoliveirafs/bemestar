@@ -45,5 +45,11 @@ export default defineConfig({
     },
     // Configuração para SPAs - resolve erro 404 ao atualizar página
     historyApiFallback: true,
+    hmr: {
+      overlay: true,
+    },
+    watch: {
+      usePolling: true,
+    },
   },
 });
