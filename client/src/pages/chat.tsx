@@ -5,7 +5,33 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/use-auth';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
+// Removido axios - usando fetch nativo
+
+// Função para testar o webhook diretamente
+const testWebhook = async (message: string, sessionId: string) => {
+  try {
+    const response = await fetch(N8N_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: message,
+        sessionId: sessionId
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Erro no teste do webhook:', error);
+    throw error;
+  }
+};
 
 interface Message {
   id: string;
@@ -59,27 +85,57 @@ export default function Chat() {
     setIsTyping(true);
 
     try {
-      const response = await axios.post(N8N_WEBHOOK_URL, {
+      console.log('Enviando mensagem para webhook:', {
         message: inputMessage,
-        sessionId: sessionId
+        sessionId: sessionId,
+        url: N8N_WEBHOOK_URL
       });
-      const botText = response.data?.message || 'Desculpe, não entendi. Tente novamente.';
-      const newBotMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: botText,
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, newBotMessage]);
-      setIsTyping(false);
-      // Atualiza sessionId se vier novo
-      if (response.data?.sessionId && response.data.sessionId !== sessionId) {
-        setSessionId(response.data.sessionId);
+
+      // Usando fetch nativo em vez de axios
+      const response = await testWebhook(inputMessage, sessionId);
+
+      console.log('Resposta do webhook recebida:', response);
+      
+      if (response && response.message) {
+        const botMessage: Message = {
+          id: Date.now().toString() + '_bot',
+          text: response.message,
+          sender: 'bot',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, botMessage]);
+      } else {
+        throw new Error('Resposta inválida do servidor');
       }
-    } catch (error) {
+      
+      setIsTyping(false);
+      
+      // Atualiza sessionId se vier novo
+      if (response?.sessionId && response.sessionId !== sessionId) {
+        setSessionId(response.sessionId);
+      }
+    } catch (error: any) {
+      console.error('Erro ao enviar mensagem para webhook:', error);
+      
+      let errorMessage = 'Erro ao conectar com o agente de IA. Tente novamente mais tarde.';
+      
+      if (error.response) {
+        // Erro de resposta do servidor
+        console.error('Erro de resposta:', error.response.status, error.response.data);
+        errorMessage = `Erro do servidor (${error.response.status}): ${error.response.data?.message || 'Erro desconhecido'}`;
+      } else if (error.request) {
+        // Erro de rede/timeout
+        console.error('Erro de rede:', error.request);
+        errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+      } else {
+        // Outro tipo de erro
+        console.error('Erro:', error.message);
+        errorMessage = `Erro: ${error.message}`;
+      }
+      
       setMessages(prev => [...prev, {
         id: (Date.now() + 2).toString(),
-        text: 'Erro ao conectar com o agente de IA. Tente novamente mais tarde.',
+        text: errorMessage,
         sender: 'bot',
         timestamp: new Date(),
       }]);
