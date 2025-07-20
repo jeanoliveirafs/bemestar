@@ -27,19 +27,32 @@ export function AnimatedCard({ children, delay = 0, hover = true, ...props }: An
       <MuiCard 
         {...props}
         sx={{
-          background: 'rgba(255, 255, 255, 0.1)',
+          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          borderRadius: 4,
-          boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.25), 0 10px 10px -5px rgba(59, 130, 246, 0.04)',
-          transition: 'all 0.3s ease',
+          border: '1px solid rgba(255, 255, 255, 0.18)',
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(59, 130, 246, 0.12), 0 2px 16px rgba(59, 130, 246, 0.08)',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent)',
+          },
           '&:hover': {
-            boxShadow: '0 20px 25px -5px rgba(59, 130, 246, 0.4), 0 10px 10px -5px rgba(59, 130, 246, 0.1)',
+            transform: 'translateY(-4px)',
+            boxShadow: '0 20px 40px rgba(59, 130, 246, 0.2), 0 8px 32px rgba(59, 130, 246, 0.15)',
+            border: '1px solid rgba(59, 130, 246, 0.3)',
           },
           ...props.sx
         }}
       >
-        <CardContent sx={{ padding: 3 }}>
+        <CardContent sx={{ padding: { xs: 3, sm: 4 }, position: 'relative', zIndex: 1 }}>
           {children}
         </CardContent>
       </MuiCard>
