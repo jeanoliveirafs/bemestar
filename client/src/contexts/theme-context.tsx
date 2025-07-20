@@ -37,7 +37,7 @@ export function ThemeContextProvider({ children }: ThemeContextProviderProps) {
         <div
           style={{
             minHeight: '100vh',
-            backgroundColor: currentTheme.palette.background.default,
+            background: 'linear-gradient(135deg, #4A7BA7 0%, #7BA3C0 30%, #B8D4E3 70%, #E8F4F8 100%)',
             color: currentTheme.palette.text.primary,
             transition: 'all 0.5s ease-in-out'
           }}

@@ -14,7 +14,7 @@ interface Message {
   timestamp: Date;
 }
 
-const N8N_WEBHOOK_URL = 'https://webn8n.jeanautomationpro.online/webhook/refugiudigital';
+const N8N_WEBHOOK_URL = 'https://webhook.jeanautomationpro.com.br/webhook/bemestar';
 
 export default function Chat() {
   const { user } = useAuth();
