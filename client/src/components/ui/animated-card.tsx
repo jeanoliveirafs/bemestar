@@ -31,8 +31,11 @@ export function AnimatedCard({ children, delay = 0, hover = true, ...props }: An
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
           borderRadius: 4,
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.25), 0 10px 10px -5px rgba(59, 130, 246, 0.04)',
           transition: 'all 0.3s ease',
+          '&:hover': {
+            boxShadow: '0 20px 25px -5px rgba(59, 130, 246, 0.4), 0 10px 10px -5px rgba(59, 130, 246, 0.1)',
+          },
           ...props.sx
         }}
       >

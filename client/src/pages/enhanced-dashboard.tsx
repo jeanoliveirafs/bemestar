@@ -399,6 +399,11 @@ export default function EnhancedDashboard() {
                     position: 'relative',
                     overflow: 'hidden',
                     maxWidth: '100%',
+                    boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.25), 0 10px 10px -5px rgba(59, 130, 246, 0.04)',
+                    transition: 'box-shadow 0.3s ease',
+                    '&:hover': {
+                      boxShadow: '0 20px 25px -5px rgba(59, 130, 246, 0.4), 0 10px 10px -5px rgba(59, 130, 246, 0.1)',
+                    },
                     '&::before': {
                       content: '""',
                       position: 'absolute',
@@ -631,10 +636,12 @@ export default function EnhancedDashboard() {
                             transition: 'all 0.3s ease',
                             maxWidth: '100%',
                             overflow: 'hidden',
+                            boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.25), 0 10px 10px -5px rgba(59, 130, 246, 0.04)',
                             '&:hover': {
                               background: `${action.color}10`,
                               borderColor: `${action.color}40`,
                               transform: 'translateY(-2px)',
+                              boxShadow: '0 20px 25px -5px rgba(59, 130, 246, 0.4), 0 10px 10px -5px rgba(59, 130, 246, 0.1)',
                             },
                             '&:active': {
                               transform: 'translateY(0px)',
