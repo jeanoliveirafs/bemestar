@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/hooks/use-auth';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
-import { AuthDebug } from '@/components/debug/auth-debug';
+
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
@@ -266,10 +266,7 @@ export default function Login() {
         
         {/* Botão de alternância de tema removido */}
         
-        {/* Componente de Debug - Temporário para diagnosticar problemas de autenticação */}
-        <div className="mt-8">
-          <AuthDebug />
-        </div>
+        
       </div>
     </div>
   );

@@ -8,140 +8,45 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Auth helper functions
 export const signIn = async (email: string, password: string) => {
-  // Modo de teste: aceita qualquer email e senha
-  // Retorna um usuário mock para testes
-  const mockUser = {
-    id: 'test-user-id',
-    email: email,
-    user_metadata: {
-      name: email.split('@')[0] || 'Usuário Teste'
-    },
-    aud: 'authenticated',
-    role: 'authenticated'
-  }
-  
-  const mockSession = {
-    access_token: 'mock-token',
-    refresh_token: 'mock-refresh-token',
-    expires_in: 3600,
-    user: mockUser
-  }
-  
-  // Simula um pequeno delay para parecer uma chamada real
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
-  return { 
-    data: { 
-      user: mockUser, 
-      session: mockSession 
-    }, 
-    error: null 
-  }
-  
-  // Código original comentado para referência futura
-  // const { data, error } = await supabase.auth.signInWithPassword({
-  //   email,
-  //   password
-  // })
-  // return { data, error }
+  // Usando autenticação real do Supabase
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  })
+  return { data, error }
 }
 
 export const signUp = async (email: string, password: string, name?: string) => {
-  // Modo de teste: aceita qualquer email e senha
-  // Retorna um usuário mock para testes
-  const mockUser = {
-    id: 'test-user-id',
-    email: email,
-    user_metadata: {
-      name: name || email.split('@')[0] || 'Usuário Teste'
-    },
-    aud: 'authenticated',
-    role: 'authenticated'
-  }
-  
-  const mockSession = {
-    access_token: 'mock-token',
-    refresh_token: 'mock-refresh-token',
-    expires_in: 3600,
-    user: mockUser
-  }
-  
-  // Simula um pequeno delay para parecer uma chamada real
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
-  // Salva o usuário mock no localStorage para simular persistência
-  localStorage.setItem('mockUser', JSON.stringify(mockUser))
-  localStorage.setItem('mockSession', JSON.stringify(mockSession))
-  
-  return { 
-    data: { 
-      user: mockUser, 
-      session: mockSession 
-    }, 
-    error: null 
-  }
-  
-  // Código original comentado para referência futura
-  // const { data, error } = await supabase.auth.signUp({
-  //   email,
-  //   password,
-  //   options: {
-  //     data: {
-  //       name: name
-  //     },
-  //     emailRedirectTo: undefined // Skip email confirmation for development
-  //   }
-  // })
-  // return { data, error }
+  // Usando autenticação real do Supabase
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        name: name
+      },
+      emailRedirectTo: undefined // Skip email confirmation for development
+    }
+  })
+  return { data, error }
 }
 
 export const signOut = async () => {
-  // Modo de teste: limpa o usuário mock do localStorage
-  localStorage.removeItem('mockUser')
-  localStorage.removeItem('mockSession')
-  
-  // Simula um pequeno delay para parecer uma chamada real
-  await new Promise(resolve => setTimeout(resolve, 300))
-  
-  return { error: null }
-  
-  // Código original comentado para referência futura
-  // const { error } = await supabase.auth.signOut()
-  // return { error }
+  // Usando logout real do Supabase
+  const { error } = await supabase.auth.signOut()
+  return { error }
 }
 
 export const getCurrentUser = async () => {
-  // Modo de teste: verifica se existe um usuário mock no localStorage
-  const mockUserStr = localStorage.getItem('mockUser')
-  if (mockUserStr) {
-    return JSON.parse(mockUserStr)
-  }
-  
-  // Se não houver usuário mock, retorna null
-  return null
-  
-  // Código original comentado para referência futura
-  // const { data: { user } } = await supabase.auth.getUser()
-  // return user
+  // Usando função real do Supabase
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
 }
 
 export const getSession = async () => {
-  // Modo de teste: verifica se existe uma sessão mock no localStorage
-  const mockSessionStr = localStorage.getItem('mockSession')
-  const mockUserStr = localStorage.getItem('mockUser')
-  
-  if (mockSessionStr && mockUserStr) {
-    const mockSession = JSON.parse(mockSessionStr)
-    const mockUser = JSON.parse(mockUserStr)
-    return { ...mockSession, user: mockUser }
-  }
-  
-  // Se não houver sessão mock, retorna null
-  return null
-  
-  // Código original comentado para referência futura
-  // const { data: { session } } = await supabase.auth.getSession()
-  // return session
+  // Usando função real do Supabase
+  const { data: { session } } = await supabase.auth.getSession()
+  return session
 }
 
 // Database helper functions
